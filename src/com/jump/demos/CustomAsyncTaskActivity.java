@@ -1,9 +1,7 @@
 package com.jump.demos;
 
 import android.app.Activity;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -17,6 +15,8 @@ public class CustomAsyncTaskActivity extends Activity {
 	private ProgressBar pb;
 	
 	private Button button;
+	private Button stop_button;
+	private Button stop_button_interrupt;
 	
 	private TextView tv;
 	
@@ -29,6 +29,12 @@ public class CustomAsyncTaskActivity extends Activity {
         
         button = (Button)findViewById(R.id.startButton);
         button.setOnClickListener(buttonListener);
+        
+        stop_button = (Button)findViewById(R.id.stopButton);
+        stop_button.setOnClickListener(buttonListener);
+        
+        stop_button_interrupt = (Button)findViewById(R.id.stopButtonInterrupt);
+        stop_button_interrupt.setOnClickListener(buttonListener);
         
         tv = (TextView)findViewById(R.id.log);
         
@@ -50,6 +56,12 @@ public class CustomAsyncTaskActivity extends Activity {
 			} catch (IllegalStateException e) {
 				Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
 			}
+			break;
+		case R.id.stopButton:
+				cat.cancel(CustomAsyncTask.CANCEL_FLAG);
+			break;
+		case R.id.stopButtonInterrupt:
+				cat.cancel(CustomAsyncTask.INTERRUPT_FLAG);
 			break;
 		default:
 			break;
@@ -73,8 +85,11 @@ public class CustomAsyncTaskActivity extends Activity {
     			try {
     				Thread.sleep(20);
     			} catch (InterruptedException e) {
+    				
     			}
     			
+    			if(this.isCancelled())
+    				return 0;
     		}
     		
     		return sum;
@@ -94,6 +109,19 @@ public class CustomAsyncTaskActivity extends Activity {
     		tv.append("\nThen number was: " + --i);
     		pb.setProgress(i);
     	}
+
+		@Override
+		void onCancelled(Integer result) {
+			switch (result) {
+			case CustomAsyncTask.CANCEL_FLAG:
+				tv.append("\nCancelled");
+				break;
+			case CustomAsyncTask.INTERRUPT_FLAG:
+				tv.append("\nCancelled with InterruptedException");
+				break;
+			}
+			
+		}
 
 	}
     

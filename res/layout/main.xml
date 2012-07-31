@@ -11,6 +11,20 @@
         android:text="@string/start_button_label"
         android:layout_gravity="center"
         />
+     <Button 
+        android:id="@+id/stopButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/stop_button_label"
+        android:layout_gravity="center"
+        />
+      <Button 
+        android:id="@+id/stopButtonInterrupt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/stop_button_interrupt_label"
+        android:layout_gravity="center"
+        />
     
    <ProgressBar 
         android:id="@+id/progressBar"

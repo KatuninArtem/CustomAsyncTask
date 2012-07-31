@@ -5,6 +5,7 @@
     <string name="app_name">CustomAsyncTask</string>
     <string name="start_button_label">Start Custom AsyncTask</string>
     <string name="stop_button_label">Stop Custom AsyncTask</string>
+    <string name="stop_button_interrupt_label">Stop Custom AsyncTask with interrupt()</string>
     <string name="log">Output...</string>
     <string name="completed">Task Completed!</string>
 
