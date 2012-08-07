@@ -2,38 +2,37 @@ package com.jump.demos;
 
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 
 public abstract class CustomAsyncTask<Result> {
 
-	private Thread thread = null;
+	private Thread thread;
 	
 	private static final int STATE_RUNNING = 0;
-	private static final int STATE_CANCELLED = 1;
-	private static final int STATE_FINISHED = 2;
+	private static final int STATE_FINISHED = 1;
+	private static final int STATE_CANCELLED = 2;
 	
-	private int state = STATE_CANCELLED;
-	private int cancel_flag = -1;
+	private volatile int state = STATE_CANCELLED;
 	
-	public static final int INTERRUPT_FLAG = 0;
-	public static final int CANCEL_FLAG = 1;
+	public static final int INTERRUPT_FLAG = -2;
+	public static final int CANCEL_FLAG = -1;
 	
-	abstract Result doInBackground();
-	abstract void onPostExecute(Result result);
-	abstract void onCancelled(Result result);
+	abstract protected Result doInBackground();
+	abstract protected void onPostExecute(Result result);
+	abstract protected void onCancelled(Result result);
 	
 	
 	public final CustomAsyncTask<Result> execute() {
-
-		if (state == STATE_RUNNING) 
+		
+		if (state == STATE_RUNNING) {
 			throw new IllegalStateException("AsyncTask is running!");
+		}
 		
 		thread = new Thread( new Runnable() {
 		
 			public void run() {
-				AsyncTaskResult res = 
-						new AsyncTaskResult<Result>(CustomAsyncTask.this,
-								doInBackground());
+				Result res = doInBackground();
 				Message msg = handler.obtainMessage();
 				msg.obj = res;
 				msg.what = state;
@@ -49,16 +48,15 @@ public abstract class CustomAsyncTask<Result> {
 	
 	private Handler handler = new Handler() {
 			
-	   	 public void handleMessage(Message msg) {
-	   		        super.handleMessage(msg);
-		            AsyncTaskResult result = (AsyncTaskResult) msg.obj;
-		            
+	   	 @SuppressWarnings("unchecked")
+		public void handleMessage(Message msg) {
+	   		        
 		            switch (msg.what) {
 		            case STATE_RUNNING:
-		            	result.mTask.onPostExecute(result.mData);
+		            	onPostExecute((Result) msg.obj);
 		            	break;
 		            case STATE_CANCELLED:
-		            	result.mTask.onCancelled(cancel_flag);
+		            	onCancelled((Result) msg.obj);
 		            	break;		 
 		            }
 		            
@@ -69,13 +67,15 @@ public abstract class CustomAsyncTask<Result> {
 	
 	   
 	public boolean isCancelled() {
-		return state > 0 ? true : false;
+		return state > 1;
 	}
 	   
 	public void cancel(int flag) {
 		
-		if (flag > 1) return;
-		
+		if (flag > -1) {
+			return;
+		}
+		state = STATE_CANCELLED;
 		switch (flag) {
 		case CANCEL_FLAG:
 			break;
@@ -84,17 +84,8 @@ public abstract class CustomAsyncTask<Result> {
 			break;
 		}
 		
-		cancel_flag = flag;
-		state = STATE_CANCELLED;
+		
 	}
 	   
-	private static class AsyncTaskResult<Data> {
-		   final CustomAsyncTask mTask;
-	       final Data mData;
-	       
-	        AsyncTaskResult(CustomAsyncTask task, Data data) {
-	        	mTask = task;
-	            mData = data;
-	        }
-	    }
+	
 }

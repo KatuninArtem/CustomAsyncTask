@@ -2,6 +2,7 @@ package com.jump.demos;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -75,28 +76,29 @@ public class CustomAsyncTaskActivity extends Activity {
     	public  final String TAG = CustomAsyncTaskTest.class.getSimpleName();
     	
     	@Override
-       	Integer doInBackground() {
+    	protected Integer doInBackground() {
     		Integer sum = 0;
     		double rand = (Math.random() * 100);
-    		
+  
     		for(int i = 0; i <= rand; i++) {
     			sum += i;
     			
     			try {
     				Thread.sleep(20);
     			} catch (InterruptedException e) {
-    				
+    				return CustomAsyncTask.INTERRUPT_FLAG;
     			}
     			
-    			if(this.isCancelled())
-    				return 0;
+    			if(this.isCancelled()) {
+    				return CustomAsyncTask.CANCEL_FLAG;
+    			}
     		}
     		
     		return sum;
     	}
 
     	@Override
-    	void onPostExecute(Integer result) {
+    	protected void onPostExecute(Integer result) {
     		int i = 1;
     		
     		tv.append("\nFinished with sum: " + result);
@@ -111,8 +113,9 @@ public class CustomAsyncTaskActivity extends Activity {
     	}
 
 		@Override
-		void onCancelled(Integer result) {
-			switch (result) {
+		protected void onCancelled(Integer r) {
+			int i = (int)r;
+			switch(i) {
 			case CustomAsyncTask.CANCEL_FLAG:
 				tv.append("\nCancelled");
 				break;
@@ -120,6 +123,7 @@ public class CustomAsyncTaskActivity extends Activity {
 				tv.append("\nCancelled with InterruptedException");
 				break;
 			}
+			
 			
 		}
 
